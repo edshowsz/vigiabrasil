@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-accent: #ea580c;
+  --color-accent-hover: #c2410c;
+  --color-accent-light: #fff7ed;
+  --color-accent-dark: #fb923c;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Dark mode ──────────────────────────────── */
+.dark {
+  --color-surface: #09090b;
+  --color-surface-raised: #18181b;
+}
+
+html.dark body {
+  background: #09090b;
+  color: #e4e4e7;
+}
+
+/* Editorial prose */
+.prose-article p {
+  font-size: 1.125rem;
+  line-height: 1.85;
+  margin-bottom: 1.5rem;
+  color: #404040;
+}
+
+.prose-article p:first-child {
+  font-size: 1.25rem;
+  color: #171717;
+  font-weight: 500;
+}
+
+.dark .prose-article p {
+  color: #a1a1aa;
+}
+
+.dark .prose-article p:first-child {
+  color: #d4d4d8;
+}
+
+/* Cards */
+.card-hover {
+  transition: all 0.15s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06), 0 6px 16px rgb(0 0 0 / 0.04);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.2);
+}

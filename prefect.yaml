@@ -1,0 +1,6 @@
+deployments:
+  - name: proposicoes-camara
+    entrypoint: tasks.camara:processar_proposicoes
+    work_pool:
+      name: camara
+    schedules: []

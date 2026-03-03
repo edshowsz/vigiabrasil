@@ -1,0 +1,69 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: vigiabrasil
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d vigiabrasil"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  prefect-server:
+    image: prefecthq/prefect:3-latest
+    command: prefect server start --host 0.0.0.0
+    environment:
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://admin:arbovia@postgres:5432/prefect
+    ports:
+      - "4200:4200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  worker-camara:
+    build: .
+    command: prefect worker start --pool camara --work-queue default
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      DATABASE_URL: postgresql://admin:arbovia@postgres:5432/autonews
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+    depends_on:
+      deploy:
+        condition: service_completed_successfully
+
+  deploy:
+    build: .
+    command: sh -c "python -c 'from database.connection import setup; setup()' && prefect work-pool create camara --type process || true && prefect deploy --all"
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      DATABASE_URL: postgresql://admin:arbovia@postgres:5432/autonews
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
