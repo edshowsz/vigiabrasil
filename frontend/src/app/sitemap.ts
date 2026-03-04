@@ -1,14 +1,17 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/db";
 import { artigos } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.com.br";
+export const dynamic = "force-dynamic";
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.org";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lista = await db
     .select({ id: artigos.id, createdAt: artigos.createdAt })
     .from(artigos)
+    .where(eq(artigos.relevante, true))
     .orderBy(desc(artigos.createdAt));
 
   const artigoEntries: MetadataRoute.Sitemap = lista.map((artigo) => ({

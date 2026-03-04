@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { artigos } from "@/db/schema";
-import { desc, count } from "drizzle-orm";
+import { desc, count, eq } from "drizzle-orm";
 import ArtigoCard from "@/components/ArtigoCard";
 import Link from "next/link";
 
@@ -18,13 +18,14 @@ export default async function Home({
   const page = Math.max(1, parseInt(pagina ?? "1", 10) || 1);
   const offset = (page - 1) * PER_PAGE;
 
-  const [totalResult] = await db.select({ total: count() }).from(artigos);
+  const [totalResult] = await db.select({ total: count() }).from(artigos).where(eq(artigos.relevante, true));
   const total = totalResult.total;
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   const lista = await db
     .select()
     .from(artigos)
+    .where(eq(artigos.relevante, true))
     .orderBy(desc(artigos.createdAt))
     .limit(PER_PAGE)
     .offset(offset);

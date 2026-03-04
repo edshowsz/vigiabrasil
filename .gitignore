@@ -31,4 +31,8 @@ out/
 .DS_Store
 Thumbs.db
 
+# Nginx (keep only default.conf)
+nginx/default-http-only.conf
+nginx/default-ssl.conf
+
 # Lock files (keep uv.lock, ignore node via frontend .gitignore)

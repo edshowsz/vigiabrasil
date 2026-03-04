@@ -4,6 +4,7 @@ import {
   integer,
   text,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const proposicoes = pgTable("proposicoes", {
@@ -22,6 +23,7 @@ export const artigos = pgTable("artigos", {
   subtitulo: text("subtitulo").notNull(),
   lide: text("lide").notNull(),
   corpo: text("corpo").notNull(),
+  relevante: boolean("relevante").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
