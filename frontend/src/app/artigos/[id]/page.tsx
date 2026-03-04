@@ -3,9 +3,51 @@ import { artigos, proposicoes } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.com.br";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const artigoId = parseInt(id, 10);
+  if (isNaN(artigoId)) return {};
+
+  const [artigo] = await db
+    .select()
+    .from(artigos)
+    .where(eq(artigos.id, artigoId))
+    .limit(1);
+
+  if (!artigo) return {};
+
+  return {
+    title: `${artigo.titulo} — Vigia Brasil`,
+    description: artigo.subtitulo,
+    openGraph: {
+      title: artigo.titulo,
+      description: artigo.subtitulo,
+      type: "article",
+      publishedTime: artigo.createdAt.toISOString(),
+      url: `${BASE_URL}/artigos/${artigo.id}`,
+      siteName: "Vigia Brasil",
+    },
+    twitter: {
+      card: "summary",
+      title: artigo.titulo,
+      description: artigo.subtitulo,
+    },
+    alternates: {
+      canonical: `${BASE_URL}/artigos/${artigo.id}`,
+    },
+  };
+}
 
 export default async function ArtigoPage({
   params,
@@ -43,8 +85,35 @@ export default async function ArtigoPage({
     minute: "2-digit",
   });
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: artigo.titulo,
+    description: artigo.subtitulo,
+    datePublished: artigo.createdAt.toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "Vigia Brasil",
+      url: BASE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Vigia Brasil",
+      url: BASE_URL,
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${BASE_URL}/artigos/${artigo.id}`,
+    },
+  };
+
   return (
-    <article className="mx-auto max-w-2xl">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <article className="mx-auto max-w-2xl">
       {/* Back link */}
       <Link
         href="/"
@@ -132,10 +201,8 @@ export default async function ArtigoPage({
 
       {/* Footer */}
       <footer className="mt-5 py-4">
-        <p className="text-center text-[11px] text-zinc-300 dark:text-zinc-700">
-          Conteúdo gerado automaticamente por IA a partir de dados públicos
-        </p>
       </footer>
-    </article>
+      </article>
+    </>
   );
 }

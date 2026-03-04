@@ -21,7 +21,7 @@ services:
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
     environment:
-      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://admin:arbovia@postgres:5432/prefect
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/prefect
     ports:
       - "4200:4200"
     depends_on:
@@ -39,7 +39,7 @@ services:
     command: prefect worker start --pool camara --work-queue default
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
-      DATABASE_URL: postgresql://admin:arbovia@postgres:5432/autonews
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     depends_on:
       deploy:
@@ -50,7 +50,7 @@ services:
     command: sh -c "python -c 'from database.connection import setup; setup()' && prefect work-pool create camara --type process || true && prefect deploy --all"
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
-      DATABASE_URL: postgresql://admin:arbovia@postgres:5432/autonews
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
     depends_on:
       prefect-server:
         condition: service_healthy

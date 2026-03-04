@@ -86,17 +86,3 @@ A matéria deve seguir esta estrutura:
 - Tempo verbal: presente do indicativo para fatos atuais, pretérito para eventos passados.
 
 ---
-
-## Formato de saída
-
-Retorne a matéria no seguinte formato estruturado:
-
-```
-id_proposicao: ...
-titulo: ...
-subtitulo: ...
-lide: ...
-corpo: ...
-```
-
----
