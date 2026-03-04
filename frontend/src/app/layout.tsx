@@ -83,10 +83,6 @@ export default function RootLayout({
         </main>
         <footer className="border-t border-zinc-100 dark:border-zinc-800/80">
           <div className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
-            <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
-              Vigia Brasil &middot; Conteúdo gerado por IA a partir de dados
-              públicos da Câmara dos Deputados
-            </p>
           </div>
         </footer>
       </body>
