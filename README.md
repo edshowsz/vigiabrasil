@@ -1,142 +1,80 @@
-# 🟠 Vigia Brasil
+# Vigia Brasil
 
-Plataforma que transforma proposições legislativas da Câmara dos Deputados em artigos jornalísticos acessíveis, gerados automaticamente por IA.
+Plataforma open-source que transforma proposições legislativas da Câmara dos Deputados em artigos jornalísticos acessíveis, gerados por inteligência artificial.
 
-![CI](https://github.com/SEU_USUARIO/vigia-brasil/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
----
-
-## Arquitetura
-
-```
-                   ┌────────────────┐
-                   │  API Câmara    │
-                   │  dos Deputados │
-                   └───────┬────────┘
-                           │
-                   ┌───────▼────────┐
-                   │   Prefect      │
-                   │   Workers      │
-                   │   (Python)     │
-                   └───────┬────────┘
-                           │  coleta + geração de artigos (OpenRouter)
-                   ┌───────▼────────┐
-                   │  PostgreSQL    │
-                   │                │
-                   └───────┬────────┘
-                           │
-                   ┌───────▼────────┐
-                   │   Next.js      │
-                   │   Frontend     │
-                   │   :3000        │
-                   └────────────────┘
-```
-
-**Stack:**
+## Stack
 
 | Camada | Tecnologia |
-|--------|-----------|
-| Orquestração | [Prefect](https://www.prefect.io/) |
-| Crawler | Python + httpx + API Câmara |
-| IA | [OpenRouter](https://openrouter.ai/) via pydantic-ai |
+|--------|------------|
+| Orquestração | Prefect 3 |
+| Coleta | Python |
+| IA | OpenRouter |
 | Banco | PostgreSQL 16 |
-| Frontend | Next.js 16 + Tailwind CSS v4 + Drizzle ORM |
-| Infra | Docker Compose + Hostinger |
+| Frontend | Next.js 16 · Tailwind CSS v4 · Drizzle ORM |
 
----
-
-## Rodando localmente
-
-### Pré-requisitos
-
-- [Docker](https://www.docker.com/) e Docker Compose
-- Chave da API [OpenRouter](https://openrouter.ai/)
-
-### Setup
+## Quick Start
 
 ```bash
-# Clone o repositório
-git clone https://github.com/SEU_USUARIO/vigia-brasil.git
-cd vigia-brasil
-
-# Configure as variáveis de ambiente
-cp .env.example .env
-# Edite o .env com suas credenciais
-
-# Suba tudo
+git clone https://github.com/edshowsz/vigiabrasil.git
+cd vigiabrasil
+cp .env.example .env   # configure suas credenciais
 docker compose up --build
 ```
 
-Acesse:
-
 | Serviço | URL |
 |---------|-----|
-| Frontend | http://localhost:3000 |
-| Prefect UI | http://localhost:4200 |
-| PostgreSQL | localhost:5432 |
+| Frontend | `http://localhost:3000` |
+| Prefect | `http://localhost:4200` |
+| PostgreSQL | `localhost:5432` |
 
----
+## Variáveis de Ambiente
 
-## Estrutura do projeto
+| Variável | Descrição |
+|----------|-----------|
+| `POSTGRES_DB` | Nome do banco |
+| `POSTGRES_USER` | Usuário PostgreSQL |
+| `POSTGRES_PASSWORD` | Senha PostgreSQL |
+| `OPENROUTER_API_KEY` | Chave API OpenRouter |
+| `PREFECT_SERVER_API_AUTH_STRING` | user:senha para autenticação no prefect |
+| `PREFECT_API_AUTH_STRING` | user:senha para autenticação no prefect  |
+
+
+Veja [`.env.example`](.env.example).
+
+## Estrutura
 
 ```
-.
-├── agent/              # Agente de IA (prompt + modelo)
-├── clients/            # Clientes para APIs externas (Câmara)
-├── database/           # Models, conexão e protocolos do banco
-├── tasks/              # Tarefas Prefect (coleta, deploy)
-├── frontend/           # Next.js (App Router)
-│   └── src/
-│       ├── app/        # Páginas
-│       ├── components/ # Componentes React
-│       └── db/         # Schema Drizzle ORM
+├── agent/          # Agente IA (prompt + modelo)
+├── clients/        # Cliente API Câmara
+├── database/       # Models e conexão PostgreSQL
+├── tasks/          # Tarefas Prefect
+├── frontend/       # Next.js (App Router)
 ├── docker-compose.yml
-├── Dockerfile          # Backend Python
-├── prefect.yaml        # Configuração de deployments Prefect
-└── pyproject.toml      # Dependências Python (uv)
+├── Dockerfile
+└── prefect.yaml
 ```
 
----
+## Pipeline
 
-## Variáveis de ambiente
+1. **Coleta** — Worker Prefect consulta a API da Câmara buscando novas proposições
+2. **Armazenamento** — Proposições persistidas no PostgreSQL com metadados completos
+3. **Geração** — Agente IA transforma cada proposição em artigo jornalístico
+4. **Publicação** — Frontend exibe artigos com referência à fonte oficial
 
-| Variável | Descrição | Obrigatória |
-|----------|-----------|:-----------:|
-| `OPENROUTER_API_KEY` | Chave da API OpenRouter para geração de artigos | ✅ |
-| `POSTGRES_DB` | Nome do banco de dados | ✅ |
-| `POSTGRES_USER` | Usuário do PostgreSQL | ✅ |
-| `POSTGRES_PASSWORD` | Senha do PostgreSQL | ✅ |
+## Deploy
 
-Todas as variáveis acima estão documentadas em [`.env.example`](.env.example).
+Deploy automático via SSH ao dar push na `main` ([`deploy.yml`](.github/workflows/deploy.yml)).
 
----
-
-## Como funciona
-
-1. **Coleta** — Um worker Prefect consulta periodicamente a API da Câmara dos Deputados buscando novas proposições (PLs, PECs, etc.)
-2. **Armazenamento** — As proposições são salvas no PostgreSQL com todos os metadados (ementa, tramitações, votações, texto integral)
-3. **Geração** — Um agente de IA (via OpenRouter) transforma cada proposição em um artigo jornalístico, seguindo diretrizes editoriais rigorosas
-4. **Publicação** — O frontend Next.js exibe os artigos em tempo real, com links para a fonte oficial na Câmara
-
----
-
-## CI/CD
-
-- **CI** — Build e lint automáticos no push/PR para `main` ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
-- **Deploy** — Deploy automático via SSH no push para `main` ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml))
-
-Para configurar o deploy, adicione estes secrets no GitHub:
+Secrets necessários (GitHub Environment):
 
 | Secret | Descrição |
 |--------|-----------|
-| `SERVER_HOST` | IP ou hostname do servidor |
+| `SERVER_HOST` | IP do servidor |
 | `SERVER_USER` | Usuário SSH |
 | `SSH_PRIVATE_KEY` | Chave privada SSH |
-| `OPENROUTER_API_KEY` | Chave da API OpenRouter |
-
----
 
 ## Licença
 
-[MIT](LICENSE) — use, modifique e distribua livremente.
+[MIT](LICENSE)
