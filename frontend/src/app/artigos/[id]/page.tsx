@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.com.br";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.org";
 
 export async function generateMetadata({
   params,
@@ -39,9 +39,10 @@ export async function generateMetadata({
       siteName: "Vigia Brasil",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: artigo.titulo,
       description: artigo.subtitulo,
+      images: [`${BASE_URL}/artigos/${artigo.id}/opengraph-image`],
     },
     alternates: {
       canonical: `${BASE_URL}/artigos/${artigo.id}`,

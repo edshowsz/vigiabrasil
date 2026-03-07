@@ -25,11 +25,11 @@ class PipelineContext:
 
 
 @task(retries=3, retry_delay_seconds=5, cache_policy=NO_CACHE)
-def listar_proposicoes(ctx: PipelineContext) -> list[Proposicao]:
+def listar_proposicoes(ctx: PipelineContext, limite: int = 5) -> list[Proposicao]:
     """Busca as proposições dos últimos 3 dias na API da Câmara."""
     logger = get_run_logger()
     try:
-        return ctx.camara_client.listar_ultimas_proposicoes(dias=3)[:5]
+        return ctx.camara_client.listar_ultimas_proposicoes(dias=3)[:limite]
     except Exception as e:
         logger.error(f"Erro ao listar proposicoes: {e}", exc_info=True)
         raise
@@ -127,9 +127,9 @@ def publicar_post_x(ctx: PipelineContext, artigo: Artigo, resumo: PostResumoX) -
     
     
 @flow()
-def processar_proposicoes():
+def processar_proposicoes(limite_proposicoes: int = 5):
     ctx = PipelineContext()
-    proposicoes = listar_proposicoes(ctx)
+    proposicoes = listar_proposicoes(ctx, limite=limite_proposicoes)
     
     for proposicao in proposicoes:
         if proposicao.ano == datetime.now(timezone.utc).year and not ctx.artigos_repo.artigo_existe_para_proposicao(proposicao.id):

@@ -22,7 +22,8 @@ services:
     command: prefect server start --host 0.0.0.0
     environment:
       PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/prefect
-      PREFECT_UI_API_URL: https://vigiabrasil.org:8443/api
+      PREFECT_UI_API_URL: https://vigiabrasil.org/prefect/api
+      PREFECT_UI_SERVE_BASE: /prefect
       PREFECT_SERVER_API_AUTH_STRING: ${PREFECT_SERVER_API_AUTH_STRING}
     expose:
       - "4200"
@@ -78,7 +79,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8443:8443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - certbot-etc:/etc/letsencrypt:ro

@@ -16,7 +16,7 @@ const newsreader = Newsreader({
   style: ["normal", "italic"],
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.com.br";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.org";
 
 export const metadata: Metadata = {
   title: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s",
   },
   description:
-    "Acompanhe proposições legislativas da Câmara dos Deputados de forma acessível, com resumos gerados por inteligência artificial.",
+    "Portal de noticias automatizado, trazendo os últimos acontecimentos na política do Brasil.",
   metadataBase: new URL(BASE_URL),
   openGraph: {
     type: "website",
@@ -32,14 +32,16 @@ export const metadata: Metadata = {
     siteName: "Vigia Brasil",
     title: "Vigia Brasil — Legislação Acessível",
     description:
-      "Acompanhe proposições legislativas da Câmara dos Deputados de forma acessível, com resumos gerados por IA.",
+      "Portal de noticias automatizado, trazendo os últimos acontecimentos na política do Brasil.",
     url: BASE_URL,
+    images: [`${BASE_URL}/opengraph-image`],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Vigia Brasil",
     description:
       "Proposições legislativas da Câmara dos Deputados explicadas por IA.",
+    images: [`${BASE_URL}/opengraph-image`],
   },
   robots: {
     index: true,
