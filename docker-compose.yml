@@ -44,6 +44,10 @@ services:
       PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      X_API_KEY: ${X_API_KEY}
+      X_API_SECRET: ${X_API_SECRET}
+      X_ACCESS_TOKEN: ${X_ACCESS_TOKEN} 
+      X_ACCESS_TOKEN_SECRET: ${X_ACCESS_TOKEN_SECRET}
     depends_on:
       deploy:
         condition: service_completed_successfully

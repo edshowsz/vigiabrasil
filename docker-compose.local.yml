@@ -1,0 +1,20 @@
+# docker-compose.local.yml — override for local development (no SSL, no nginx)
+services:
+  prefect-server:
+    ports:
+      - "4200:4200"
+    environment:
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/prefect
+      PREFECT_UI_API_URL: http://localhost:4200/api
+
+  frontend:
+    ports:
+      - "3000:3000"
+
+  nginx:
+    profiles:
+      - donotstart
+
+  certbot:
+    profiles:
+      - donotstart

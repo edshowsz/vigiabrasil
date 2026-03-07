@@ -123,6 +123,7 @@ class Artigo(SQLModel, table=True):
     lide: str = Field(sa_column=Column(Text, nullable=False))
     corpo: str = Field(sa_column=Column(Text, nullable=False))
     relevante: bool = Field(default=False)
+    post_url: Optional[str] = Field(default=None)
 
     created_at: datetime = Field(
         default_factory=_now, sa_column=Column(DateTime(timezone=True), server_default=func.now())

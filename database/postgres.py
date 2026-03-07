@@ -87,10 +87,12 @@ class PostgresArtigosRepository(ArtigosRepositoryProtocol):
     def __init__(self):
         self.engine = get_engine()
 
-    def salvar_artigo(self, artigo: Artigo) -> None:
+    def salvar_artigo(self, artigo: Artigo) -> Artigo:
         with Session(self.engine) as session:
-            session.merge(artigo)
+            merged = session.merge(artigo)
             session.commit()
+            session.refresh(merged)
+            return merged
 
     def artigo_existe_para_proposicao(self, id_proposicao: int) -> bool:
         with Session(self.engine) as session:
@@ -112,3 +114,43 @@ class PostgresArtigosRepository(ArtigosRepositoryProtocol):
                 stmt = stmt.limit(limit)
             rows = session.exec(stmt).all()
             return list(rows)
+
+    def listar_artigos_sem_resumo_x(self, limit: Optional[int] = None) -> List[Artigo]:
+        """Retorna artigos relevantes que ainda não têm resumo para o X."""
+        with Session(self.engine) as session:
+            stmt = (
+                select(Artigo)
+                .where(Artigo.relevante == True)  # noqa: E712
+                .where(Artigo.x_resumo.is_(None))  # type: ignore
+                .order_by(Artigo.created_at.desc())  # type: ignore
+            )
+            if limit:
+                stmt = stmt.limit(limit)
+            rows = session.exec(stmt).all()
+            return list(rows)
+
+    def listar_artigos_para_publicar_x(self, limit: Optional[int] = None) -> List[Artigo]:
+        """Retorna artigos com resumo para X gerado mas ainda não publicados."""
+        with Session(self.engine) as session:
+            stmt = (
+                select(Artigo)
+                .where(Artigo.relevante == True)  # noqa: E712
+                .where(Artigo.x_resumo.isnot(None))  # type: ignore
+                .where(Artigo.x_publicado == False)  # noqa: E712
+                .order_by(Artigo.created_at.desc())  # type: ignore
+            )
+            if limit:
+                stmt = stmt.limit(limit)
+            rows = session.exec(stmt).all()
+            return list(rows)
+
+
+    def marcar_como_publicado_no_x(self, artigo_id: int, post_url: str | None = None) -> None:
+        """Marca o artigo como publicado no X e salva a URL do post."""
+        with Session(self.engine) as session:
+            artigo = session.get(Artigo, artigo_id)
+            if not artigo: return
+            if not post_url: return 
+            artigo.post_url = post_url
+            session.add(artigo)
+            session.commit()
