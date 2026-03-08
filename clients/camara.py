@@ -174,9 +174,10 @@ class CamaraAPIClient:
             url = self._proxima_pagina(data)
         return proposicoes
 
-    def detalhar_proposicao(self, proposicao_id: int) -> Optional[Dict]:
+    def detalhar_proposicao(self, proposicao_id: int) -> Proposicao:
+        """Busca os detalhes completos de uma proposição, incluindo urlInteiroTeor."""
         data = self._get(f"{self.BASE_URL}/proposicoes/{proposicao_id}")
-        return data["dados"]
+        return Proposicao.model_validate(data["dados"])
 
     def obter_autores_proposicao(self, proposicao_id: int) -> List[Dict]:
         data = self._get(f"{self.BASE_URL}/proposicoes/{proposicao_id}/autores")

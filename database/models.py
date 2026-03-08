@@ -95,7 +95,7 @@ class Proposicao(SQLModel, table=True):
     uri_prop_posterior: Optional[str] = Field(default=None, alias="uriPropPosterior")
     url_inteiro_teor: Optional[str] = Field(default=None, alias="urlInteiroTeor")
     urn_final: Optional[str] = Field(default=None, alias="urnFinal")
-    texto: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
+    texto_inteiro_teor: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
     justificativa: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
     tramitacoes: Optional[List[Dict]] = Field(default=None, sa_column=Column(JSON, nullable=True))
     votacoes: Optional[List[Dict]] = Field(default=None, sa_column=Column(JSON, nullable=True))

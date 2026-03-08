@@ -40,6 +40,7 @@ services:
   worker-camara:
     build: .
     command: prefect worker start --pool camara --work-queue default
+    restart: on-failure
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
       PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING}

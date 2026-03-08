@@ -3,4 +3,6 @@ deployments:
     entrypoint: tasks.camara:processar_proposicoes
     work_pool:
       name: camara
-    schedules: []
+    schedules:
+      - cron: "0 0 * * *"
+        timezone: "America/Sao_Paulo"

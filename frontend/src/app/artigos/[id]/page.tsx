@@ -37,12 +37,13 @@ export async function generateMetadata({
       publishedTime: artigo.createdAt.toISOString(),
       url: `${BASE_URL}/artigos/${artigo.id}`,
       siteName: "Vigia Brasil",
+      images: [`${BASE_URL}/opengraph-image`],
     },
     twitter: {
       card: "summary_large_image",
       title: artigo.titulo,
       description: artigo.subtitulo,
-      images: [`${BASE_URL}/artigos/${artigo.id}/opengraph-image`],
+      images: [`${BASE_URL}/opengraph-image`],
     },
     alternates: {
       canonical: `${BASE_URL}/artigos/${artigo.id}`,

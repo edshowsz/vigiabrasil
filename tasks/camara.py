@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from database.models import Proposicao, Artigo
 from clients.camara import CamaraAPIClient
 from clients.x import XClient
+from services.pdf_extractor import PDFExtractorService, PDFExtractorResult
 
 from prefect.artifacts import create_markdown_artifact
 from prefect.cache_policies import NO_CACHE
@@ -22,6 +23,7 @@ class PipelineContext:
         self.camara_repo: PostgresCamaraRepository = PostgresCamaraRepository()
         self.artigos_repo: PostgresArtigosRepository = PostgresArtigosRepository()
         self.x_client: XClient = XClient()
+        self.pdf_extractor: PDFExtractorService = PDFExtractorService()
 
 
 @task(retries=3, retry_delay_seconds=5, cache_policy=NO_CACHE)
@@ -33,9 +35,24 @@ def listar_proposicoes(ctx: PipelineContext, limite: int = 5) -> list[Proposicao
     except Exception as e:
         logger.error(f"Erro ao listar proposicoes: {e}", exc_info=True)
         raise
+    
+@task(retries=3, retry_delay_seconds=5, cache_policy=NO_CACHE)    
+def filtrar_proposicoes_pendentes(ctx: PipelineContext, proposicoes: list[Proposicao]) -> list[Proposicao]:
+    """Filtra as proposições que ainda não foram processadas (sem artigo gerado)."""
+    logger = get_run_logger()
+    try:
+        pendentes = []
+        for prop in proposicoes:
+            if prop.ano == datetime.now(timezone.utc).year and not ctx.artigos_repo.artigo_existe_para_proposicao(prop.id):
+                pendentes.append(prop)
+        logger.info(f"Encontradas {len(pendentes)} proposições pendentes para processamento.")
+        return pendentes
+    except Exception as e:
+        logger.error(f"Erro ao filtrar proposicoes pendentes: {e}", exc_info=True)
+        raise
 
 @task(retries=3, retry_delay_seconds=5, cache_policy=NO_CACHE)
-def obter_proposicao(ctx: PipelineContext, proposicao_id: int) -> dict:
+def obter_proposicao(ctx: PipelineContext, proposicao_id: int) -> Proposicao:
     """Busca detalhes de uma proposição na API da Câmara."""
     logger = get_run_logger()
     try:
@@ -43,6 +60,25 @@ def obter_proposicao(ctx: PipelineContext, proposicao_id: int) -> dict:
     except Exception as e:
         logger.error(f"Erro ao obter proposicao ({proposicao_id}): {e}", exc_info=True)
         raise
+    
+    
+@task(retries=3, retry_delay_seconds=5, cache_policy=NO_CACHE)
+def extrair_texto_pdf_proposicao(ctx: PipelineContext, proposicao: Proposicao) -> Proposicao:
+    """Extrai o texto integral do PDF da proposição e adiciona ao objeto."""
+    logger = get_run_logger()
+    try:
+        if not proposicao.url_inteiro_teor:
+            logger.debug(f"Proposição {proposicao.id} sem URL de inteiro teor.")
+            return proposicao
+
+        resultado: PDFExtractorResult = ctx.pdf_extractor.extrair_texto_de_url(proposicao.url_inteiro_teor)
+        proposicao.texto_inteiro_teor = resultado.texto_extraido
+        logger.info(f"Texto extraído para proposição {proposicao.id}: {len(proposicao.texto_inteiro_teor or '')} caracteres")
+        return proposicao
+    
+    except Exception as e:
+        logger.error(f"Erro ao extrair texto da proposição ({proposicao.id}): {e}", exc_info=True)
+        return proposicao
 
 @task(retries=3, retry_delay_seconds=5, cache_policy=NO_CACHE)
 def salvar_proposicao(ctx: PipelineContext, proposicao: Proposicao):
@@ -118,6 +154,7 @@ def publicar_post_x(ctx: PipelineContext, artigo: Artigo, resumo: PostResumoX) -
             texto_final = f"{post_cortado}\n{link}"
 
         data = ctx.x_client.publicar_post(texto_final)
+        ctx.artigos_repo.marcar_como_publicado_no_x(artigo.id, x_url)
         logger.info(f"[Artigo {artigo.id}] Post publicado no X com sucesso.")
         return data.get("url", "")
         
@@ -128,14 +165,21 @@ def publicar_post_x(ctx: PipelineContext, artigo: Artigo, resumo: PostResumoX) -
     
 @flow()
 def processar_proposicoes(limite_proposicoes: int = 5):
-    ctx = PipelineContext()
-    proposicoes = listar_proposicoes(ctx, limite=limite_proposicoes)
     
-    for proposicao in proposicoes:
-        if proposicao.ano == datetime.now(timezone.utc).year and not ctx.artigos_repo.artigo_existe_para_proposicao(proposicao.id):
-            salvar_proposicao(ctx, proposicao)
-            artigo = criar_artigo(ctx, proposicao)
-            artigo = salvar_artigo(ctx, proposicao, artigo)
-            resumo = resumir_artigo_para_x(ctx, artigo)
-            x_url = publicar_post_x(ctx, artigo, resumo)
-            ctx.artigos_repo.marcar_como_publicado_no_x(artigo.id, x_url)
+    ctx = PipelineContext()
+    logger = get_run_logger()
+    
+    proposicoes = listar_proposicoes(ctx, limite=limite_proposicoes)
+    proposices_pendentes = filtrar_proposicoes_pendentes(ctx, proposicoes)
+    
+    if not proposices_pendentes:
+        logger.info("Nenhuma proposição pendente encontrada. Encerrando o fluxo.")
+        return
+    
+    for proposicao in proposices_pendentes:
+        proposicao = extrair_texto_pdf_proposicao(ctx, proposicao)
+        salvar_proposicao(ctx, proposicao)
+        criar_artigo(ctx, proposicao)
+        salvar_artigo(ctx, proposicao, artigo)
+        resumir_artigo_para_x(ctx, artigo)
+        publicar_post_x(ctx, artigo, resumo)

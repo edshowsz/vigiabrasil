@@ -20,19 +20,19 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vigiabrasil.org";
 
 export const metadata: Metadata = {
   title: {
-    default: "Vigia Brasil — Legislação Acessível",
+    default: "Vigia Brasil — Notícias",
     template: "%s",
   },
   description:
-    "Portal de noticias automatizado, trazendo os últimos acontecimentos na política do Brasil.",
+    "Portal de noticias automatizado e open source, trazendo os últimos acontecimentos na política do Brasil.",
   metadataBase: new URL(BASE_URL),
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: "Vigia Brasil",
-    title: "Vigia Brasil — Legislação Acessível",
+    title: "Vigia Brasil — Notícias",
     description:
-      "Portal de noticias automatizado, trazendo os últimos acontecimentos na política do Brasil.",
+      "Portal de noticias automatizado e open source, trazendo os últimos acontecimentos na política do Brasil.",
     url: BASE_URL,
     images: [`${BASE_URL}/opengraph-image`],
   },
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Vigia Brasil",
     description:
-      "Proposições legislativas da Câmara dos Deputados explicadas por IA.",
+      "Portal de noticias automatizado e open source, trazendo os últimos acontecimentos na política do Brasil.",
     images: [`${BASE_URL}/opengraph-image`],
   },
   robots: {
