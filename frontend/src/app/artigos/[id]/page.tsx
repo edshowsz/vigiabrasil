@@ -34,13 +34,17 @@ export async function generateMetadata({
   return {
     title: `${artigo.titulo} — Vigia Brasil`,
     description: artigo.subtitulo,
+    keywords: ["proposição legislativa", "câmara dos deputados", "política brasileira", "legislação"],
     openGraph: {
       title: artigo.titulo,
       description: artigo.subtitulo,
       type: "article",
       publishedTime: artigo.createdAt.toISOString(),
+      section: "Legislação",
+      authors: ["Vigia Brasil"],
       url: `${BASE_URL}/artigos/${artigo.id}`,
       siteName: "Vigia Brasil",
+      locale: "pt_BR",
       images: [`${BASE_URL}/opengraph-image`],
     },
     twitter: {
@@ -113,20 +117,30 @@ export default async function ArtigoPage({
     headline: artigo.titulo,
     description: artigo.subtitulo,
     datePublished: artigo.createdAt.toISOString(),
+    image: `${BASE_URL}/opengraph-image`,
+    articleSection: "Legislação",
+    inLanguage: "pt-BR",
     author: {
       "@type": "Organization",
       name: "Vigia Brasil",
       url: BASE_URL,
     },
     publisher: {
-      "@type": "Organization",
+      "@type": "NewsMediaOrganization",
       name: "Vigia Brasil",
       url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/opengraph-image`,
+        width: 1200,
+        height: 630,
+      },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `${BASE_URL}/artigos/${artigo.id}`,
     },
+    isAccessibleForFree: true,
   };
 
   return (

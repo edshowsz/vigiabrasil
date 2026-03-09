@@ -82,6 +82,42 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="font-sans bg-background text-foreground antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": `${BASE_URL}/#website`,
+                  name: "Vigia Brasil",
+                  url: BASE_URL,
+                  description:
+                    "Portal de notícias automatizado e open source sobre proposições legislativas da Câmara dos Deputados.",
+                  inLanguage: "pt-BR",
+                  publisher: { "@id": `${BASE_URL}/#organization` },
+                },
+                {
+                  "@type": "NewsMediaOrganization",
+                  "@id": `${BASE_URL}/#organization`,
+                  name: "Vigia Brasil",
+                  url: BASE_URL,
+                  logo: {
+                    "@type": "ImageObject",
+                    url: `${BASE_URL}/opengraph-image`,
+                    width: 1200,
+                    height: 630,
+                  },
+                  sameAs: [
+                    "https://x.com/viabordo",
+                    "https://github.com/edshowsz/vigiabrasil",
+                  ],
+                },
+              ],
+            }),
+          }}
+        />
         <Header />
         <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8">
           {children}

@@ -154,9 +154,10 @@ def publicar_post_x(ctx: PipelineContext, artigo: Artigo, resumo: PostResumoX) -
             texto_final = f"{post_cortado}\n{link}"
 
         data = ctx.x_client.publicar_post(texto_final)
+        x_url = data.get("url", "")
         ctx.artigos_repo.marcar_como_publicado_no_x(artigo.id, x_url)
         logger.info(f"[Artigo {artigo.id}] Post publicado no X com sucesso.")
-        return data.get("url", "")
+        return x_url
         
     except Exception as e:
         logger.error(f"Erro ao publicar post do artigo ({artigo.id}) no X: {e}", exc_info=True)
@@ -179,7 +180,7 @@ def processar_proposicoes(limite_proposicoes: int = 5):
     for proposicao in proposices_pendentes:
         proposicao = extrair_texto_pdf_proposicao(ctx, proposicao)
         salvar_proposicao(ctx, proposicao)
-        criar_artigo(ctx, proposicao)
-        salvar_artigo(ctx, proposicao, artigo)
-        resumir_artigo_para_x(ctx, artigo)
+        artigo = criar_artigo(ctx, proposicao)
+        artigo = salvar_artigo(ctx, proposicao, artigo)
+        resumo = resumir_artigo_para_x(ctx, artigo)
         publicar_post_x(ctx, artigo, resumo)
