@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Newsreader } from "next/font/google";
+import { Inter, Newsreader, Geist } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,7 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${newsreader.variable}`}>
+    <html lang="pt-BR" className={cn(inter.variable, newsreader.variable, "font-sans", geist.variable)}>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-H22WMQHZPM"
@@ -78,13 +81,37 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="font-[family-name:var(--font-inter)] bg-white text-zinc-900 antialiased dark:bg-[#09090b] dark:text-zinc-100">
+      <body className="font-sans bg-background text-foreground antialiased">
         <Header />
         <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8">
           {children}
         </main>
-        <footer className="border-t border-zinc-100 dark:border-zinc-800/80">
+        <footer className="border-t border-border">
           <div className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand text-[10px] font-extrabold text-brand-foreground">
+                  VB
+                </span>
+                <span className="text-sm font-medium text-foreground">
+                  Vigia Brasil
+                </span>
+              </div>
+              <p className="text-center text-xs text-muted-foreground sm:text-right">
+                Proposições legislativas da Câmara dos Deputados explicadas por IA.
+                <br />
+                Código aberto no{" "}
+                <a
+                  href="https://github.com/edshowsz/vigiabrasil"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand transition-colors hover:text-brand-hover underline underline-offset-2"
+                >
+                  GitHub
+                </a>
+                .
+              </p>
+            </div>
           </div>
         </footer>
       </body>

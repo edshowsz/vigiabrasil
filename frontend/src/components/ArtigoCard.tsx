@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Artigo } from "@/db/schema";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 function tempoAtras(data: Date): string {
   const agora = new Date();
@@ -25,40 +27,47 @@ export default function ArtigoCard({
   featured?: boolean;
 }) {
   return (
-    <Link href={`/artigos/${artigo.id}`} className="block">
-      <article
-        className={`card-hover group rounded-xl border border-zinc-100 bg-white px-5 py-5 dark:border-zinc-800 dark:bg-zinc-900 ${
-          featured ? "sm:px-6 sm:py-6" : ""
+    <Link href={`/artigos/${artigo.id}`} className="block group">
+      <Card
+        className={`transition-all duration-150 hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/30 ${
+          featured ? "py-5 sm:py-6" : "py-4"
         }`}
       >
-        <div className="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
-          <span className="font-medium text-accent dark:text-accent-dark">Câmara</span>
-          <span>·</span>
-          <time>{tempoAtras(artigo.createdAt)}</time>
-        </div>
+        <CardHeader className="gap-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="bg-brand-light text-brand dark:bg-brand/10 dark:text-brand">
+              Câmara
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              <time>{tempoAtras(artigo.createdAt)}</time>
+            </span>
+          </div>
 
-        <h2
-          className={`mt-2 font-[family-name:var(--font-newsreader)] font-semibold leading-snug text-zinc-900 group-hover:text-accent dark:text-zinc-200 dark:group-hover:text-accent-dark ${
-            featured ? "text-xl sm:text-2xl" : "text-base sm:text-lg"
-          }`}
-        >
-          {artigo.titulo}
-        </h2>
+          <h2
+            className={`font-serif font-semibold leading-snug text-card-foreground group-hover:text-brand transition-colors ${
+              featured ? "text-xl sm:text-2xl" : "text-base sm:text-lg"
+            }`}
+          >
+            {artigo.titulo}
+          </h2>
+        </CardHeader>
 
-        <p
-          className={`mt-1.5 leading-relaxed text-zinc-500 dark:text-zinc-400 ${
-            featured ? "text-[15px] line-clamp-3" : "text-sm line-clamp-2"
-          }`}
-        >
-          {artigo.subtitulo}
-        </p>
-
-        {featured && artigo.lide && (
-          <p className="mt-2 text-sm leading-relaxed text-zinc-400 line-clamp-2 dark:text-zinc-500">
-            {artigo.lide}
+        <CardContent className="-mt-2">
+          <p
+            className={`leading-relaxed text-muted-foreground ${
+              featured ? "text-[15px] line-clamp-3" : "text-sm line-clamp-2"
+            }`}
+          >
+            {artigo.subtitulo}
           </p>
-        )}
-      </article>
+
+          {featured && artigo.lide && (
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground/70 line-clamp-2">
+              {artigo.lide}
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </Link>
   );
 }
