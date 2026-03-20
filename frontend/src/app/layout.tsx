@@ -57,6 +57,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: BASE_URL,
+    types: {
+      "application/rss+xml": `${BASE_URL}/feed.xml`,
+    },
   },
 };
 
@@ -78,6 +81,22 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-H22WMQHZPM');
+          `}
+        </Script>
+        <Script
+          src="https://news.google.com/swg/js/v1/swg-basic.js"
+          strategy="afterInteractive"
+        />
+        <Script id="swg-basic-init" strategy="afterInteractive">
+          {`
+            (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
+              basicSubscriptions.init({
+                type: "NewsArticle",
+                isPartOfType: ["Product"],
+                isPartOfProductId: "CAowrc7fCw:openaccess",
+                clientOptions: { theme: "light", lang: "pt-BR" },
+              });
+            });
           `}
         </Script>
       </head>
@@ -122,6 +141,15 @@ export default function RootLayout({
         <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8">
           {children}
         </main>
+        <footer className="border-t border-border">
+          <div className="mx-auto max-w-3xl px-5 py-6 sm:px-8 flex flex-wrap gap-4 items-center justify-between">
+            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} Vigia Brasil</span>
+            <div className="flex gap-4">
+              <a href="/termos" className="text-xs text-muted-foreground hover:text-brand transition-colors">Termos de Serviço</a>
+              <a href="/privacidade" className="text-xs text-muted-foreground hover:text-brand transition-colors">Política de Privacidade</a>
+            </div>
+          </div>
+        </footer>
       </body>
     </html>
   );

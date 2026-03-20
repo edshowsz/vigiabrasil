@@ -296,7 +296,14 @@ export default async function ArtigoPage({
         </nav>
       )}
 
-      <footer className="mt-5 py-4">
+      <footer className="mt-5 py-4 border-t border-border space-y-2">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Este artigo foi gerado automaticamente por inteligência artificial com base em fontes públicas oficiais. O conteúdo tem caráter informativo e não representa opinião editorial.
+        </p>
+        <div className="flex gap-3">
+          <Link href="/termos" className="text-xs text-muted-foreground hover:text-brand transition-colors">Termos de Serviço</Link>
+          <Link href="/privacidade" className="text-xs text-muted-foreground hover:text-brand transition-colors">Política de Privacidade</Link>
+        </div>
       </footer>
       </article>
     </>
