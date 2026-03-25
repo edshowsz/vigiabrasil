@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:16
     environment:
+      TZ: America/Sao_Paulo
       POSTGRES_DB: vigiabrasil
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -21,6 +22,7 @@ services:
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
     environment:
+      TZ: America/Sao_Paulo
       PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/prefect
       PREFECT_UI_API_URL: https://vigiabrasil.org/prefect/api
       PREFECT_UI_SERVE_BASE: /prefect
@@ -45,6 +47,7 @@ services:
     command: prefect worker start --pool camara --work-queue default
     restart: on-failure
     environment:
+      TZ: America/Sao_Paulo
       PREFECT_API_URL: http://prefect-server:4200/api
       PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
@@ -61,6 +64,7 @@ services:
     build: .
     command: sh -c "python -c 'from database.connection import setup; setup()' && prefect work-pool create camara --type process || true && prefect deploy --all"
     environment:
+      TZ: America/Sao_Paulo
       PREFECT_API_URL: http://prefect-server:4200/api
       PREFECT_API_AUTH_STRING: ${PREFECT_API_AUTH_STRING}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
@@ -71,6 +75,8 @@ services:
   frontend:
     build: ./frontend
     environment:
+      TZ: America/Sao_Paulo
+      HOSTNAME: "0.0.0.0"
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/vigiabrasil
     expose:
       - "3000"
